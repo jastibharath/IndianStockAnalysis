@@ -1,4 +1,5 @@
 # Indian Stock Analysis - Deployment Guide
+# url - https://indianstockanalysis-production.up.railway.app/
 
 ## Quick Deploy Options
 
