@@ -30,6 +30,7 @@
         .card-value { font-size: 1.25rem; font-weight: 700; display: block; margin-top: 4px; }
         .price-val { font-size: 1.5rem; font-weight: 900; }
         .chart-container { width: 100%; height: 500px; margin-bottom: 32px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; background-color: #1e293b; }
+        #tradingview_widget { width: 100%; height: 100%; }
         .company-info { margin-top: 20px; background: #0b1220; border: 1px solid #213043; padding: 16px; border-radius: 8px; color: #cbd5e1; display: none; }
         .status-error { color: #fb7185; }
         .status-success { color: #34d399; }
@@ -217,11 +218,16 @@
             const container = document.getElementById('chartContainer');
             container.style.display = 'block';
             
+            // Clear previous widget
+            document.getElementById('tradingview_widget').innerHTML = '';
+            
             // TradingView uses NSE:SYMBOL or BSE:SYMBOL
-            const tvSymbol = `${exchange}:${symbol}`;
+            const tvSymbol = `${exchange}:${symbol.toUpperCase().trim()}`;
+            console.log('Loading TradingView for:', tvSymbol);
             
             new TradingView.widget({
-                "autosize": true,
+                "width": "100%",
+                "height": "100%",
                 "symbol": tvSymbol,
                 "interval": "D",
                 "timezone": "Asia/Kolkata",
@@ -230,6 +236,7 @@
                 "locale": "en",
                 "toolbar_bg": "#f1f3f6",
                 "enable_publishing": false,
+                "hide_side_toolbar": false,
                 "allow_symbol_change": true,
                 "container_id": "tradingview_widget"
             });
