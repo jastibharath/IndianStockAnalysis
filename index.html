@@ -14,12 +14,12 @@
         .search-wrapper { position: relative; margin-bottom: 32px; }
         .search-box { display: flex; gap: 16px; }
         .input-container { position: relative; flex: 1; }
-        input { width: 100%; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; color: #ffffff; font-size: 1.125rem; font-weight: 600; text-transform: uppercase; outline: none; }
-        input:focus { border-color: #10b981; }
-        button { background-color: #10b981; color: #ffffff; border: none; border-radius: 8px; padding: 0 32px; font-size: 1.125rem; font-weight: 700; cursor: pointer; transition: background-color 0.2s; }
+        input { width: 100%; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; color: #ffffff; font-size: 1.125rem; font-weight: 600; }
+        input:focus { border-color: #10b981; outline: none; }
+        button { background-color: #10b981; color: #ffffff; border: none; border-radius: 8px; padding: 12px 32px; font-size: 1.125rem; font-weight: 700; cursor: pointer; transition: background-color 0.2s; }
         button:hover { background-color: #059669; }
-        .dropdown { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; max-height: 240px; overflow-y: auto; z-index: 999; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5); display: none; }
-        .dropdown-item { padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; transition: background-color 0.15s; }
+        .dropdown { position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; max-height: 240px; overflow-y: auto; display: none; z-index: 10; }
+        .dropdown-item { padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; transition: background-color 0.1s; }
         .dropdown-item:hover { background-color: #334155; }
         .dropdown-item .ticker { font-weight: 700; color: #34d399; }
         .dropdown-item .name { color: #cbd5e1; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 16px; }
@@ -29,30 +29,29 @@
         .card-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; display: block; }
         .card-value { font-size: 1.25rem; font-weight: 700; display: block; margin-top: 4px; }
         .price-val { font-size: 1.5rem; font-weight: 900; }
-        .text-emerald { color: #34d399; }
-        .text-rose { color: #fb7185; }
-        .chart-card { background-color: #1e293b; border: 1px solid #334155; padding: 24px; border-radius: 12px; }
+        .chart-card { background-color: #1e293b; border: 1px solid #334155; padding: 24px; border-radius: 12px; margin-bottom: 32px; }
         .chart-title { color: #cbd5e1; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
-        #chartContainer { width: 100%; height: 320px; position: relative; }
-        .chart-tooltip { position: absolute; pointer-events: none; display: none; background: rgba(2,6,23,0.9); color: #e6eef8; padding: 8px 10px; font-size: 0.9rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); transform: translate(-50%, -120%); white-space: nowrap; }
+        .company-info { margin-top: 20px; background: #0b1220; border: 1px solid #213043; padding: 16px; border-radius: 8px; color: #cbd5e1; display: none; }
+        .status-error { color: #fb7185; }
+        .status-success { color: #34d399; }
+        select { padding: 8px 10px; border-radius: 8px; background: #0f172a; color: #fff; border: 1px solid #334155; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Indian Market Dashboard</h1>
-            <div class="subtitle">Open-source financial tracking system (Free Data Feed)</div>
+            <div class="subtitle">Open-source financial tracking system</div>
         </header>
 
         <div class="search-wrapper">
             <div class="search-box">
                 <div class="input-container">
-                    <!-- FIXED: Added onfocus action so the selection panel reveals itself immediately on click -->
-                    <input id="tickerInput" type="text" placeholder="Type stock name or ticker (e.g., RELIANCE, TCS)..." autocomplete="off" oninput="handleSearchInput()" onfocus="handleSearchInput()">
+                    <input id="tickerInput" type="text" placeholder="Type stock ticker (e.g., RELIANCE, TCS, INFY)..." autocomplete="off" oninput="handleSearchInput()" onfocus="handleSearchInput()">
                     <div id="dropdownMenu" class="dropdown"></div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
-                    <select id="exchangeSelect" style="padding:8px 10px; border-radius:8px; background:#0f172a; color:#fff; border:1px solid #334155;">
+                    <select id="exchangeSelect">
                         <option value="NSE">NSE</option>
                         <option value="BSE">BSE</option>
                     </select>
@@ -73,23 +72,14 @@
                 <span id="compPrice" class="card-value price-val">-</span>
             </div>
             <div class="card">
-                <span class="card-label">Daily Variance</span>
+                <span class="card-label">Daily Change</span>
                 <span id="compChange" class="card-value">-</span>
             </div>
         </div>
 
-        <div class="chart-card" style="background-color: #1e293b; border: 1px solid #334155; padding: 24px; border-radius: 14px; margin-bottom: 32px;">
-            <h3 class="chart-title" style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 18px;">
-                Advanced Market Charting Terminal
-            </h3>
-            <div id="tradingview_advanced_terminal_canvas" style="width: 100%; height: 500px;">
-                <!-- The pure iframe element gets cleanly injected here -->
-            </div>
-        </div>
-        
-        <div id="companyInfo" style="margin-top:20px; background:#0b1220; border:1px solid #213043; padding:16px; border-radius:8px; color:#cbd5e1; display:none;">
+        <div id="companyInfo" class="company-info">
             <h3 id="ci_name" style="color:#34d399; margin-bottom:8px;">Company Name</h3>
-            <div id="ci_badges" style="margin-bottom:8px; display:flex; gap:8px; align-items:center;"></div>
+            <div id="ci_badges" style="margin-bottom:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;"></div>
             <div id="ci_meta" style="font-size:0.95rem; color:#94a3b8; margin-bottom:8px;"></div>
             <div id="ci_statGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin-bottom:12px;"></div>
             <div id="ci_source" style="font-size:0.9rem; color:#94a3b8; margin-bottom:8px;"></div>
@@ -98,245 +88,36 @@
             <div id="ci_extra" style="font-size:0.9rem; color:#94a3b8; margin-top:8px; display:flex; gap:12px; flex-wrap:wrap;"></div>
         </div>
     </div>
-    <script type="text/javascript">
-        // FIX: Using the native browser Iframe method to completely bypass script blocks and network load hangs
-        function renderStockChartTerminal(tickerKey = "RELIANCE") {
-            const targetCanvas = document.getElementById('tradingview_advanced_terminal_canvas');
-            if (!targetCanvas) return;
-
-            const assetExchange = "NSE";
-            const fullyFormattedSymbol = `${assetExchange}:${tickerKey.toUpperCase()}`;
-
-            const widgetOptions = {
-                symbol: fullyFormattedSymbol,
-                frameborder: "0",
-                allowfullscreen: "true",
-                scrolling: "no",
-                theme: "dark",
-                style: "1",
-                locale: "in",
-                interval: "D",
-                timezone: "Asia/Kolkata",
-                hide_side_toolbar: "false",
-                allow_symbol_change: "true",
-                studies: "[]"
-            };
-
-            const queryString = Object.keys(widgetOptions)
-                .map(key => `${key}=${encodeURIComponent(widgetOptions[key])}`)
-                .join('&');
-
-            const targetIframeUrl = `https://tradingview.com?${queryString}`;
-
-            targetCanvas.innerHTML = `
-                <iframe 
-                    src="${targetIframeUrl}" 
-                    width="100%" 
-                    height="100%" 
-                    style="border: none; border-radius: 8px;" 
-                    allowfullscreen="true">
-                </iframe>`;
-                
-            console.log(`[Iframe Engine] Successfully mounted candlestick view wrapper for ${fullyFormattedSymbol}`);
-        }
-
-        // Connects your selection dropdown inputs straight to our failure-proof iframe engine
-        function selectStock(ticker) {
-            document.getElementById('tickerInput').value = ticker;
-            const dropdown = document.getElementById('dropdownMenu');
-            if (dropdown) dropdown.style.display = 'none';
-            
-            renderStockChartTerminal(ticker);
-            
-            if (typeof fetchStockData === 'function') fetchStockData(ticker);
-            if (typeof fetchCompanyProfileDetails === 'function') fetchCompanyProfileDetails(ticker);
-        }
-
-        // Direct interface search button connection
-        function triggerManualSearch() {
-            const ticker = document.getElementById('tickerInput').value.trim();
-            if (ticker) {
-                selectStock(ticker);
-            }
-        }
-
-        // Initialize the primary chart view instantly when the page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            renderStockChartTerminal("RELIANCE");
-        });
-    </script>
 
     <script>
-        function createCompanyStat(label, value) {
-            return `
-                <div style="background:#111827; border:1px solid #334155; border-radius:10px; padding:12px;">
-                    <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">${label}</div>
-                    <div style="font-size:1rem; font-weight:700; color:#f8fafc;">${value}</div>
-                </div>
-            `;
-        }
+        // Popular Indian stocks
+        const NIFTY_STOCKS = [
+            { ticker: 'RELIANCE', name: 'Reliance Industries' },
+            { ticker: 'TCS', name: 'Tata Consultancy Services' },
+            { ticker: 'INFY', name: 'Infosys' },
+            { ticker: 'WIPRO', name: 'Wipro' },
+            { ticker: 'BAJAJFINSV', name: 'Bajaj Finserv' },
+            { ticker: 'AXISBANK', name: 'Axis Bank' },
+            { ticker: 'BHARTIARTL', name: 'Bharti Airtel' },
+            { ticker: 'SBIN', name: 'State Bank of India' },
+            { ticker: 'HCLTECH', name: 'HCL Technologies' },
+            { ticker: 'MARUTI', name: 'Maruti Suzuki' },
+            { ticker: 'BAJAJ-AUTO', name: 'Bajaj Auto' },
+            { ticker: 'DRREDDY', name: 'Dr. Reddy Laboratories' },
+            { ticker: 'ASIANPAINT', name: 'Asian Paints' },
+            { ticker: 'SUNPHARMA', name: 'Sun Pharmaceutical' },
+            { ticker: 'LT', name: 'Larsen & Toubro' },
+            { ticker: 'NESTLEIND', name: 'Nestle India' },
+            { ticker: 'POWERGRID', name: 'Power Grid' },
+            { ticker: 'NTPC', name: 'NTPC Limited' },
+            { ticker: 'COALINDIA', name: 'Coal India' },
+            { ticker: 'JSWSTEEL', name: 'JSW Steel' }
+        ];
 
-        function renderHistoryFallback(historyData, message) {
-            const fallback = document.getElementById('fallbackChart');
-            const canvas = document.getElementById('fallbackCanvas');
-            const messageEl = document.getElementById('fallbackMessage');
-            if (!fallback || !canvas || !messageEl) return;
-            if (!Array.isArray(historyData) || historyData.length === 0) {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '16px system-ui';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('No chart history available to display.', canvas.width / 2, canvas.height / 2);
-                messageEl.innerText = message || '';
-                fallback.style.display = 'block';
-                return;
-            }
-            fallbackHistoryData = historyData.slice(-30);
-            drawLocalHistoryChart(canvas, fallbackHistoryData);
-            registerFallbackCanvasEvents();
-            messageEl.innerText = message || '';
-            fallback.style.display = 'block';
-        }
-
-        function drawLocalHistoryChart(canvas, historyData) {
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            const padding = 40;
-            ctx.clearRect(0, 0, width, height);
-            const values = historyData.map(item => item.close);
-            const dates = historyData.map(item => item.date);
-            const min = Math.min(...values);
-            const max = Math.max(...values);
-            const range = max - min || 1;
-            const chartWidth = width - padding * 2;
-            const chartHeight = height - padding * 2;
-
-            // background
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(0, 0, width, height);
-
-            // grid lines
-            ctx.strokeStyle = '#1f2937';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= 4; i++) {
-                const y = padding + (chartHeight / 4) * i;
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-            }
-
-            // axes labels
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '12px system-ui';
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'middle';
-            for (let i = 0; i <= 4; i++) {
-                const value = max - (range / 4) * i;
-                const y = padding + (chartHeight / 4) * i;
-                ctx.fillText(`₹${value.toFixed(0)}`, padding - 8, y);
-            }
-            // y-axis label
-            ctx.save();
-            ctx.translate(12, height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('Price', 0, 0);
-            ctx.restore();
-
-            // x-axis line
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
-            ctx.stroke();
-
-            // line path
-            ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            historyData.forEach((item, index) => {
-                const x = padding + (chartWidth / (historyData.length - 1)) * index;
-                const y = padding + chartHeight - ((item.close - min) / range) * chartHeight;
-                if (index === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
-
-            // points
-            ctx.fillStyle = '#34d399';
-            historyData.forEach((item, index) => {
-                const x = padding + (chartWidth / (historyData.length - 1)) * index;
-                const y = padding + chartHeight - ((item.close - min) / range) * chartHeight;
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // date labels
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '11px system-ui';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText(dates[0], padding, height - padding + 6);
-            ctx.fillText(dates[dates.length - 1], width - padding, height - padding + 6);
-        }
-
-        function registerFallbackCanvasEvents() {
-            if (fallbackCanvasEventsAdded) return;
-            const canvas = document.getElementById('fallbackCanvas');
-            const tooltip = document.getElementById('fallbackTooltip');
-            if (!canvas || !tooltip) return;
-            canvas.addEventListener('mousemove', event => {
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                updateFallbackTooltip(canvas, tooltip, x, y);
-            });
-            canvas.addEventListener('mouseout', () => {
-                tooltip.style.display = 'none';
-            });
-            fallbackCanvasEventsAdded = true;
-        }
-
-        function updateFallbackTooltip(canvas, tooltip, x, y) {
-            if (!fallbackHistoryData || fallbackHistoryData.length === 0) {
-                tooltip.style.display = 'none';
-                return;
-            }
-            const width = canvas.width;
-            const height = canvas.height;
-            const padding = 40;
-            const chartWidth = width - padding * 2;
-            const chartHeight = height - padding * 2;
-            const rawIndex = ((x - padding) / chartWidth) * (fallbackHistoryData.length - 1);
-            const index = Math.round(rawIndex);
-            if (index < 0 || index >= fallbackHistoryData.length) {
-                tooltip.style.display = 'none';
-                return;
-            }
-            const item = fallbackHistoryData[index];
-            tooltip.innerText = `${item.date} — ₹${item.close.toFixed(2)}`;
-            const rect = canvas.getBoundingClientRect();
-            const tooltipWidth = tooltip.offsetWidth || 140;
-            const tooltipLeft = Math.min(Math.max(rect.left + padding + rawIndex / (fallbackHistoryData.length - 1) * chartWidth - tooltipWidth / 2, rect.left + 8), rect.right - tooltipWidth - 8);
-            const tooltipTop = Math.max(rect.top + y - 50, rect.top + 8);
-            tooltip.style.left = `${tooltipLeft - rect.left}px`;
-            tooltip.style.top = `${tooltipTop - rect.top}px`;
-            tooltip.style.display = 'block';
-        }
-
-        // Handles auto-revealing stock records instantly upon focus or query manipulation
         function handleSearchInput() {
             const query = document.getElementById('tickerInput').value.toUpperCase().trim();
             const dropdown = document.getElementById('dropdownMenu');
             
-            // IMPROVEMENT: If search field is empty, showcase all available configurations right away
             const matches = query === "" ? NIFTY_STOCKS : NIFTY_STOCKS.filter(item => 
                 item.ticker.includes(query) || item.name.toUpperCase().includes(query)
             );
@@ -345,7 +126,7 @@
                 dropdown.innerHTML = `<div style="padding: 12px; color: #64748b; text-align: center; font-size: 0.875rem;">No results found</div>`;
             } else {
                 dropdown.innerHTML = matches.map(stock => `
-                    <div onmousedown="selectStock('${stock.ticker}')" class="dropdown-item">
+                    <div onclick="selectStock('${stock.ticker}')" class="dropdown-item" style="cursor:pointer;">
                         <span class="ticker">${stock.ticker}</span>
                         <span class="name">${stock.name}</span>
                     </div>
@@ -359,56 +140,52 @@
             document.getElementById('tickerInput').value = upper;
             document.getElementById('dropdownMenu').style.display = 'none';
             const exchange = document.getElementById('exchangeSelect').value || 'NSE';
-            const match = NIFTY_STOCKS.find(item => item.ticker === upper);
-            const wikiQuery = match ? match.name : upper;
-            renderStockChartTerminal(upper, exchange);
-            fetchStockData(upper, exchange, wikiQuery);
+            fetchStockData(upper, exchange);
         }
 
         function triggerManualSearch() {
             const ticker = document.getElementById('tickerInput').value.trim();
-            const exchange = document.getElementById('exchangeSelect').value || 'NSE';
-            let wikiQuery = ticker;
-            const upper = ticker.toUpperCase();
-            const match = NIFTY_STOCKS.find(item => item.ticker === upper || item.name.toUpperCase() === upper);
-            if (match) wikiQuery = match.name;
             if (ticker) {
-                document.getElementById('dropdownMenu').style.display = 'none';
-                renderStockChartTerminal(upper, exchange);
-                fetchStockData(upper, exchange, wikiQuery);
+                selectStock(ticker);
             }
         }
 
-        function parseCSV(csvText) {
-            const lines = csvText.split('\n');
-            const result = [];
-            for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(',');
-                if (row.length >= 5 && row[0] && row[4]) {
-                    result.push({
-                        date: row[0],
-                        close: parseFloat(row[4])
-                    });
-                }
-            }
-            return result.filter(item => !isNaN(item.close));
+        function createCompanyStat(label, value) {
+            return `
+                <div style="background:#111827; border:1px solid #334155; border-radius:10px; padding:12px;">
+                    <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">${label}</div>
+                    <div style="font-size:1rem; font-weight:700; color:#f8fafc;">${value}</div>
+                </div>
+            `;
         }
 
-        async function fetchStockData(symbol, exchange = 'NSE', wikiQuery = '') {
+        function formatMarketCap(n) {
+            if (!n && n !== 0) return 'N/A';
+            const num = Number(n);
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toString();
+        }
+
+        async function fetchStockData(symbol, exchange = 'NSE') {
             const status = document.getElementById('statusArea');
             try {
-            status.innerText = `Loading ${symbol} (${exchange})...`;
-            const resp = await fetch(`/api/history/${encodeURIComponent(symbol)}?exchange=${encodeURIComponent(exchange)}`);
-                if (!resp.ok) throw new Error('Failed to load history');
-                const json = await resp.json();
-                const parsedHistory = Array.isArray(json.data) ? json.data : [];
+                status.innerText = `Loading ${symbol} (${exchange})...`;
+                
+                // Fetch historical data
+                const histResp = await fetch(`/api/history/${encodeURIComponent(symbol)}?exchange=${encodeURIComponent(exchange)}`);
+                if (!histResp.ok) throw new Error('Failed to load history');
+                const histJson = await histResp.json();
+                const parsedHistory = Array.isArray(histJson.data) ? histJson.data : [];
 
                 if (parsedHistory.length === 0) {
-                    status.innerText = 'No historical data available for ' + symbol;
+                    status.innerText = `No historical data available for ${symbol}`;
+                    document.getElementById('stockMetrics').style.display = 'none';
                     return;
                 }
 
-                createTradingViewWidget(symbol, exchange, parsedHistory);
                 const currentDayLog = parsedHistory[parsedHistory.length - 1];
                 const previousDayLog = parsedHistory.length > 1 ? parsedHistory[parsedHistory.length - 2] : currentDayLog;
 
@@ -420,92 +197,101 @@
                 document.getElementById('compName').innerText = `${symbol.toUpperCase()} (${exchange})`;
                 document.getElementById('compPrice').innerText = `₹${currentPrice.toFixed(2)}`;
                 document.getElementById('compChange').innerText = `${varianceDelta >= 0 ? '+' : ''}${varianceDelta.toFixed(2)} (${percentageDelta.toFixed(2)}%)`;
-
-                // fetch company profile
-                try {
-                    const pResp = await fetch(`/api/profile/${encodeURIComponent(symbol)}?exchange=${encodeURIComponent(exchange)}&wikiQuery=${encodeURIComponent(wikiQuery)}`);
-                    if (pResp.ok) {
-                        const pj = await pResp.json();
-                            const prof = pj.profile || {};
-                            document.getElementById('ci_name').innerText = prof.longName || symbol;
-
-                            // badges for sector/industry
-                            const badges = [];
-                            if (prof.sector && prof.sector !== 'N/A') badges.push(`<span style="background:#071025;color:#10b981;padding:6px 8px;border-radius:6px;font-weight:700;font-size:0.85rem;">${prof.sector}</span>`);
-                            if (prof.industry && prof.industry !== 'N/A') badges.push(`<span style="background:#071025;color:#94a3b8;padding:6px 8px;border-radius:6px;font-weight:600;font-size:0.85rem;">${prof.industry}</span>`);
-                            document.getElementById('ci_badges').innerHTML = badges.join(' ');
-
-                            // meta and extra
-                            const meta = [];
-                            if (prof.sector && prof.sector !== 'N/A') meta.push(prof.sector);
-                            if (prof.industry && prof.industry !== 'N/A') meta.push(prof.industry);
-                            document.getElementById('ci_meta').innerText = meta.join(' • ');
-
-                            const statCards = [];
-                            if (prof.founded) statCards.push(createCompanyStat('Founded', prof.founded));
-                            if (prof.fullTimeEmployees) {
-                                const employees = typeof prof.fullTimeEmployees === 'number' ? prof.fullTimeEmployees.toLocaleString() : prof.fullTimeEmployees;
-                                statCards.push(createCompanyStat('Employees', employees));
-                            }
-                            if (prof.totalRevenue) statCards.push(createCompanyStat('Revenue', prof.totalRevenue));
-                            if (prof.revenueGrowth) statCards.push(createCompanyStat('Revenue Growth', prof.revenueGrowth));
-                            document.getElementById('ci_statGrid').innerHTML = statCards.length > 0 ? statCards.join('') : '<div style="color:#64748b; grid-column: 1 / -1;">No key company metrics available.</div>';
-
-                            // market cap (human readable)
-                            const extraParts = [];
-                            if (prof.marketCap) extraParts.push('Market Cap: ' + formatMarketCap(prof.marketCap));
-                            if (prof.website) extraParts.push(`<a href="${prof.website}" target="_blank" rel="noopener noreferrer" style="color:#10b981">Website</a>`);
-                            if (prof.wikipedia) extraParts.push(`<a href="${prof.wikipedia}" target="_blank" rel="noopener noreferrer" style="color:#10b981">Wikipedia</a>`);
-                            document.getElementById('ci_extra').innerHTML = extraParts.join(' • ');
-
-                            // summary with read more toggle
-                            const full = prof.summary || '';
-                            const shortLimit = 240;
-                            const summaryEl = document.getElementById('ci_summary');
-                            const sourceEl = document.getElementById('ci_source');
-                            const readmore = document.getElementById('ci_readmore');
-                            sourceEl.innerText = prof.summarySource ? `Source: ${prof.summarySource}` : '';
-                            summaryEl.dataset.full = full;
-                            if (full.length > shortLimit) {
-                                summaryEl.innerText = full.substring(0, shortLimit).trim() + '...';
-                                readmore.style.display = 'inline-block';
-                                readmore.innerText = 'Read more';
-                                readmore.onclick = function(e) {
-                                    e.preventDefault();
-                                    if (readmore.dataset.expanded === '1') {
-                                        summaryEl.innerText = full.substring(0, shortLimit).trim() + '...';
-                                        readmore.innerText = 'Read more';
-                                        readmore.dataset.expanded = '0';
-                                    } else {
-                                        summaryEl.innerText = full;
-                                        readmore.innerText = 'Read less';
-                                        readmore.dataset.expanded = '1';
-                                    }
-                                };
-                            } else {
-                                summaryEl.innerText = full;
-                                readmore.style.display = 'none';
-                            }
-
-                            document.getElementById('companyInfo').style.display = 'block';
-                        }
+                
+                if (varianceDelta < 0) {
+                    document.getElementById('compChange').style.color = '#fb7185';
+                } else {
+                    document.getElementById('compChange').style.color = '#34d399';
                 }
-                catch (e) {
-                    console.error('Profile fetch failed', e);
+
+                // Fetch company profile
+                try {
+                    const profResp = await fetch(`/api/profile/${encodeURIComponent(symbol)}?exchange=${encodeURIComponent(exchange)}`);
+                    if (profResp.ok) {
+                        const profJson = await profResp.json();
+                        const prof = profJson.profile || {};
+                        document.getElementById('ci_name').innerText = prof.longName || symbol;
+
+                        // badges for sector/industry
+                        const badges = [];
+                        if (prof.sector && prof.sector !== 'N/A') badges.push(`<span style="background:#071025;color:#10b981;padding:6px 8px;border-radius:6px;font-weight:700;font-size:0.8rem;">${prof.sector}</span>`);
+                        if (prof.industry && prof.industry !== 'N/A') badges.push(`<span style="background:#071025;color:#94a3b8;padding:6px 8px;border-radius:6px;font-weight:600;font-size:0.8rem;">${prof.industry}</span>`);
+                        document.getElementById('ci_badges').innerHTML = badges.join(' ');
+
+                        // meta
+                        const meta = [];
+                        if (prof.sector && prof.sector !== 'N/A') meta.push(prof.sector);
+                        if (prof.industry && prof.industry !== 'N/A') meta.push(prof.industry);
+                        document.getElementById('ci_meta').innerText = meta.join(' • ');
+
+                        // stat cards
+                        const statCards = [];
+                        if (prof.founded) statCards.push(createCompanyStat('Founded', prof.founded));
+                        if (prof.fullTimeEmployees) {
+                            const employees = typeof prof.fullTimeEmployees === 'number' ? prof.fullTimeEmployees.toLocaleString() : prof.fullTimeEmployees;
+                            statCards.push(createCompanyStat('Employees', employees));
+                        }
+                        if (prof.totalRevenue) statCards.push(createCompanyStat('Revenue', prof.totalRevenue));
+                        if (prof.revenueGrowth) statCards.push(createCompanyStat('Revenue Growth', prof.revenueGrowth));
+                        document.getElementById('ci_statGrid').innerHTML = statCards.length > 0 ? statCards.join('') : '<div style="color:#64748b; grid-column: 1 / -1;">No key metrics available</div>';
+
+                        // extra links
+                        const extraParts = [];
+                        if (prof.marketCap) extraParts.push('Market Cap: ' + formatMarketCap(prof.marketCap));
+                        if (prof.website) extraParts.push(`<a href="${prof.website}" target="_blank" rel="noopener noreferrer" style="color:#10b981">Website</a>`);
+                        if (prof.wikipedia) extraParts.push(`<a href="${prof.wikipedia}" target="_blank" rel="noopener noreferrer" style="color:#10b981">Wikipedia</a>`);
+                        document.getElementById('ci_extra').innerHTML = extraParts.join(' • ');
+
+                        // summary
+                        const full = prof.summary || '';
+                        const shortLimit = 240;
+                        const summaryEl = document.getElementById('ci_summary');
+                        const sourceEl = document.getElementById('ci_source');
+                        const readmore = document.getElementById('ci_readmore');
+                        sourceEl.innerText = prof.summarySource ? `Source: ${prof.summarySource}` : '';
+                        summaryEl.dataset.full = full;
+                        
+                        if (full.length > shortLimit) {
+                            summaryEl.innerText = full.substring(0, shortLimit).trim() + '...';
+                            readmore.style.display = 'inline-block';
+                            readmore.innerText = 'Read more';
+                            readmore.onclick = function(e) {
+                                e.preventDefault();
+                                if (readmore.dataset.expanded === '1') {
+                                    summaryEl.innerText = full.substring(0, shortLimit).trim() + '...';
+                                    readmore.innerText = 'Read more';
+                                    readmore.dataset.expanded = '0';
+                                } else {
+                                    summaryEl.innerText = full;
+                                    readmore.innerText = 'Read less';
+                                    readmore.dataset.expanded = '1';
+                                }
+                            };
+                        } else {
+                            summaryEl.innerText = full;
+                            readmore.style.display = 'none';
+                        }
+
+                        document.getElementById('companyInfo').style.display = 'block';
+                    }
+                } catch (e) {
+                    console.error('Profile fetch error:', e);
                 }
 
                 status.innerText = '';
-            }
-            catch (err) {
+            } catch (err) {
                 console.error(err);
-                const msg = err && err.message ? err.message : 'Unknown error';
-                document.getElementById('statusArea').innerText = 'Error: ' + msg;
+                status.innerText = `Error: ${err.message}`;
+                status.classList.add('status-error');
+                setTimeout(() => {
+                    status.innerText = '';
+                    status.classList.remove('status-error');
+                }, 5000);
             }
         }
 
-        // Initialize chart and dropdown on load
+        // Setup page
         function setupPage() {
-            initChart();
             handleSearchInput();
             document.addEventListener('click', function(e) {
                 const dropdown = document.getElementById('dropdownMenu');
@@ -521,18 +307,6 @@
         } else {
             setupPage();
         }
-
-        function formatMarketCap(n) {
-            if (!n && n !== 0) return 'N/A';
-            const num = Number(n);
-            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-            return num.toString();
-        }
-        
     </script>
 </body>
 </html>
-
