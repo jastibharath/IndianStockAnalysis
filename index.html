@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,8 +30,8 @@
         .card-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; display: block; }
         .card-value { font-size: 1.25rem; font-weight: 700; display: block; margin-top: 4px; }
         .price-val { font-size: 1.5rem; font-weight: 900; }
-        .chart-container { width: 100%; height: 500px; margin-bottom: 32px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; background-color: #1e293b; }
-        #tradingview_widget { width: 100%; height: 100%; }
+        .chart-container { width: 100%; min-height: 500px; margin-bottom: 32px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; background-color: #0f172a; position: relative; }
+        #tradingview_widget { width: 100%; height: 500px; }
         .company-info { margin-top: 20px; background: #0b1220; border: 1px solid #213043; padding: 16px; border-radius: 8px; color: #cbd5e1; display: none; }
         .status-error { color: #fb7185; }
         .status-success { color: #34d399; }
@@ -216,30 +217,42 @@
 
         function updateTradingViewWidget(symbol, exchange) {
             const container = document.getElementById('chartContainer');
+            if (!container) return;
+            
             container.style.display = 'block';
             
-            // Clear previous widget
-            document.getElementById('tradingview_widget').innerHTML = '';
+            // Generate a fresh ID each time to force a full widget re-load
+            const widgetId = 'tv_chart_' + Math.floor(Math.random() * 1000000);
+            container.innerHTML = `<div id="${widgetId}"></div>`;
             
-            // TradingView uses NSE:SYMBOL or BSE:SYMBOL
-            const tvSymbol = `${exchange}:${symbol.toUpperCase().trim()}`;
-            console.log('Loading TradingView for:', tvSymbol);
-            
-            new TradingView.widget({
-                "width": "100%",
-                "height": "100%",
-                "symbol": tvSymbol,
-                "interval": "D",
-                "timezone": "Asia/Kolkata",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_side_toolbar": false,
-                "allow_symbol_change": true,
-                "container_id": "tradingview_widget"
-            });
+            const tvSymbol = `${exchange.toUpperCase()}:${symbol.toUpperCase().trim()}`;
+            console.log('Rendering Chart for:', tvSymbol);
+
+            setTimeout(() => {
+                if (window.TradingView) {
+                    new window.TradingView.widget({
+                        "width": "100%",
+                        "height": 500,
+                        "symbol": tvSymbol,
+                        "interval": "D",
+                        "timezone": "Asia/Kolkata",
+                        "theme": "dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "#1e293b",
+                        "enable_publishing": false,
+                        "allow_symbol_change": true,
+                        "container_id": widgetId,
+                        "hide_side_toolbar": false,
+                        "details": false,
+                        "hotlist": false,
+                        "calendar": false,
+                        "show_popup_button": true,
+                        "popup_width": "1000",
+                        "popup_height": "650"
+                    });
+                }
+            }, 50);
         }
 
         async function fetchStockData(symbol, exchange = 'NSE') {
