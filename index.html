@@ -29,8 +29,7 @@
         .card-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; display: block; }
         .card-value { font-size: 1.25rem; font-weight: 700; display: block; margin-top: 4px; }
         .price-val { font-size: 1.5rem; font-weight: 900; }
-        .chart-card { background-color: #1e293b; border: 1px solid #334155; padding: 24px; border-radius: 12px; margin-bottom: 32px; }
-        .chart-title { color: #cbd5e1; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+        .chart-container { width: 100%; height: 500px; margin-bottom: 32px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; background-color: #1e293b; }
         .company-info { margin-top: 20px; background: #0b1220; border: 1px solid #213043; padding: 16px; border-radius: 8px; color: #cbd5e1; display: none; }
         .status-error { color: #fb7185; }
         .status-success { color: #34d399; }
@@ -38,6 +37,46 @@
     </style>
 </head>
 <body>
+    <!-- TradingView Ticker Tape Widget -->
+    <div class="tradingview-widget-container" style="margin-bottom: 16px;">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+        "symbols": [
+            {
+            "proName": "NSE:NIFTY",
+            "title": "NIFTY 50"
+            },
+            {
+            "proName": "BSE:SENSEX",
+            "title": "SENSEX"
+            },
+            {
+            "proName": "NSE:BANKNIFTY",
+            "title": "BANK NIFTY"
+            },
+            {
+            "proName": "NSE:RELIANCE",
+            "title": "RELIANCE"
+            },
+            {
+            "proName": "NSE:TCS",
+            "title": "TCS"
+            },
+            {
+            "proName": "NSE:INFY",
+            "title": "INFOSYS"
+            }
+        ],
+        "showSymbolLogo": true,
+        "colorTheme": "dark",
+        "isTransparent": false,
+        "displayMode": "adaptive",
+        "locale": "en"
+        }
+        </script>
+    </div>
+
     <div class="container">
         <header>
             <h1>Indian Market Dashboard</h1>
@@ -61,6 +100,10 @@
         </div>
 
         <div id="statusArea" style="margin-bottom:16px; color:#94a3b8; font-size:0.95rem;"></div>
+
+        <div id="chartContainer" class="chart-container" style="display: none;">
+            <div id="tradingview_widget"></div>
+        </div>
 
         <div id="stockMetrics" class="metrics-grid" style="display: none;">
             <div class="card">
@@ -89,6 +132,7 @@
         </div>
     </div>
 
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         // Popular Indian stocks
         const NIFTY_STOCKS = [
@@ -169,11 +213,36 @@
             return num.toString();
         }
 
+        function updateTradingViewWidget(symbol, exchange) {
+            const container = document.getElementById('chartContainer');
+            container.style.display = 'block';
+            
+            // TradingView uses NSE:SYMBOL or BSE:SYMBOL
+            const tvSymbol = `${exchange}:${symbol}`;
+            
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": tvSymbol,
+                "interval": "D",
+                "timezone": "Asia/Kolkata",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_widget"
+            });
+        }
+
         async function fetchStockData(symbol, exchange = 'NSE') {
             const status = document.getElementById('statusArea');
             try {
                 status.innerText = `Loading ${symbol} (${exchange})...`;
                 
+                // Update TradingView Widget
+                updateTradingViewWidget(symbol, exchange);
+
                 // Fetch historical data
                 const histResp = await fetch(`/api/history/${encodeURIComponent(symbol)}?exchange=${encodeURIComponent(exchange)}`);
                 if (!histResp.ok) throw new Error('Failed to load history');
